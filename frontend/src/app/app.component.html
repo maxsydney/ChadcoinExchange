@@ -1,14 +1,27 @@
 <div class="container-fluid">
   <div class="row no-gutter">
-    <!-- The image half -->
+    <!-- Image -->
     <div class="col-md-6 d-none d-md-flex bg-image"></div>
 
-
-    <!-- The content half -->
+    <!-- Content -->
     <div class="col-md-6 transactionContainer">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg transactionContainer">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Exchange <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">How it works</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
       <div class="login d-flex align-items-center py-10">
-
-        <!-- Demo content-->
         <div class="row">
           <div class="col-lg-8 mx-auto w-100">
             <div class="container-fluid containerWrapper rounded px-4 border">
@@ -19,8 +32,8 @@
                     <div class="input-group-prepend">
                       <span class="input-group-text entry-box text-light console">Receive</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light console" aria-label="Amount (to the nearest dollar)"
-                      placeholder="0.00">
+                    <input type="text" class="form-control entry-box text-light console"
+                      aria-label="Amount (to the nearest dollar)" placeholder="0.00">
                     <div class="input-group-append">
                       <span class="input-group-text entry-box text-light console">chads</span>
                     </div>
@@ -42,34 +55,34 @@
                 <div class="col-md-6">
                   <div class="input-group my-1">
                     <div class="input-group-prepend">
-                      <span class="input-group-text entry-box text-light console">Spend</span>
+                      <span class="input-group-text entry-box text-light console d-flex">Spend</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light console" aria-label="Amount (to the nearest dollar)"
-                      placeholder="0.00">
+                    <input type="text" class="form-control entry-box text-light console d-flex"
+                      aria-label="Amount (to the nearest dollar)" placeholder="0.00">
                     <div class="input-group-append">
-                      <span class="input-group-text entry-box text-light console">chads</span>
+                      <span class="input-group-text entry-box text-light console d-flex">chads</span>
                     </div>
                   </div>
-                  <div class="input-group my-1">
+                  <div class="input-group my-1 d-flex">
                     <div class="input-group-prepend">
-                      <span class="input-group-text entry-box text-light console">Receive</span>
+                      <span class="input-group-text entry-box text-light console d-flex">Receive</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light form-control-plaintext console" placeholder="0.00" readonly>
+                    <input type="text" class="form-control entry-box text-light form-control-plaintext console d-flex"
+                      placeholder="0.00" readonly>
                     <div class="input-group-append">
-                      <span class="input-group-text entry-box text-light console">algo</span>
+                      <span class="input-group-text entry-box text-light console d-flex">algo</span>
                     </div>
                   </div>
                   <div class="row mx-auto my-1 mb-2">
-                    <button type="submit" class="btn sell-button btn-block text-uppercase shadow-sm console"> Sell </button>
+                    <button type="submit" class="btn sell-button btn-block text-uppercase shadow-sm console"> Sell
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div><!-- End -->
-
+        </div>
       </div>
-    </div><!-- End -->
-
+    </div>
   </div>
 </div>

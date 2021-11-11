@@ -21,7 +21,7 @@
 }
 
 .input-group>.input-group-prepend>.input-group-text {
-    flex: 0 0 30%;
+    flex: 0 0 40%;
 }
 .input-group>.input-group-append>.input-group-text  {
     flex: 0 0 30%;
@@ -51,3 +51,8 @@ input, textarea{
 .console {
     font-family: "Courier New", Courier, monospace;
 }
+
+.navbar ul li a {
+    color:#777;}
+    .navbar ul li a:hover {
+    color:#f7f7f7;}
