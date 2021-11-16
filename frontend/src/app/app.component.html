@@ -10,23 +10,27 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="#">Exchange <span class="sr-only">(current)</span></a>
+              <a class="nav-link console" href="#">Exchange <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">How it works</a>
+              <a class="nav-link console" href="#">How it works</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
+              <a class="nav-link console" href="#">About</a>
             </li>
           </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item" (click)="connectWallet()">
+                <a class="nav-link console" href="#">Connect wallet</a>
+            </li>
+        </ul>
         </div>
       </nav>
       <div class="login d-flex align-items-center py-10">
         <div class="row">
           <div class="col-lg-8 mx-auto w-100">
             <div class="container-fluid containerWrapper rounded px-4 border">
-              <h3 class="display-3 text-light">Exchange Chadcoin</h3>
-              <div class="row">
+              <div class="row pt-2">
                 <div class="col-md-6">
                   <div class="input-group my-1">
                     <div class="input-group-prepend">

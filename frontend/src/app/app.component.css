@@ -54,5 +54,10 @@ input, textarea{
 
 .navbar ul li a {
     color:#777;}
-    .navbar ul li a:hover {
-    color:#f7f7f7;}
+.navbar ul li a:hover {
+color:#f7f7f7;}
+
+.navbar
+{
+    border-bottom:1px solid #777;
+}
