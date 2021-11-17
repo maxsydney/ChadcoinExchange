@@ -5,8 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
-import WalletConnect from "@walletconnect/client";
-
 @NgModule({
   declarations: [
     AppComponent
@@ -15,7 +13,6 @@ import WalletConnect from "@walletconnect/client";
     BrowserModule,
     AppRoutingModule,
     NgbModule,
-    // WalletConnect
   ],
   providers: [],
   bootstrap: [AppComponent]
