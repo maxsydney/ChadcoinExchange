@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import WalletConnect from "@walletconnect/client";
-import QRCodeModal from "algorand-walletconnect-qrcode-modal";
+import WalletConnectQRCodeModal from "algorand-walletconnect-qrcode-modal";
 import { interval } from 'rxjs';
 import algosdk, { Account } from 'algosdk';
 // import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
@@ -13,10 +13,7 @@ import algosdk, { Account } from 'algosdk';
 
 export class AppComponent {
   title = 'frontend';
-  connector= new WalletConnect({
-    bridge: "https://bridge.walletconnect.org", // Required
-    qrcodeModal: QRCodeModal,
-  });
+  connector: WalletConnect;
   connected = false;
   account: any;
   algoBalance: number = 0;
@@ -37,7 +34,12 @@ export class AppComponent {
   }))
 
   connectWallet() {
-    // Check if connection is already established
+    this.connector= new WalletConnect({
+      bridge: "https://bridge.walletconnect.org", // Required
+      qrcodeModal: WalletConnectQRCodeModal,
+    });
+
+    // Check if connection is already established{}
     if (!this.connector.connected) {
       // create new session
       this.connector.createSession();
@@ -54,7 +56,7 @@ export class AppComponent {
       this.account = payload.params[0].accounts[0];
       console.log(this.account);
       this.connected = true;
-      QRCodeModal.close();
+      WalletConnectQRCodeModal.close();
       this.getAccInfo(this.account);
     });
 
@@ -68,7 +70,7 @@ export class AppComponent {
       const { accounts } = payload.params[0];
     });
 
-    QRCodeModal.open(this.connector.uri, 2);
+    WalletConnectQRCodeModal.open(this.connector.uri, {});
   }
 
   disconnectWallet(): void {
