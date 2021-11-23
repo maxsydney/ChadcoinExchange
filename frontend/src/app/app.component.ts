@@ -19,18 +19,19 @@ export class AppComponent {
   algoBalance: number = 0;
   chadBalance: number = 0;
 
-  server = "https://testnet-algorand.api.purestake.io/ps2";
+  server = "https://mainnet-algorand.api.purestake.io/ps2";
   port = "";
   token = {
     "x-api-key": "Xq0wmBHRay4ou13yYq30e55HYVGWfmBB3qlpBkgT"
   };
 
-  client = new algosdk.Algodv2(this.token, this.server, this.port);
+  client = new algosdk.Indexer(this.token, this.server, this.port);
 
   // This keeps the page updating. Not a valid solution, learn how to 
   // repsond to async auth events
   mySub = interval(100).subscribe((func => {
-    console.log(this.connected);
+    console.log(this.algoBalance);
+
   }))
 
   connectWallet() {
@@ -83,8 +84,19 @@ export class AppComponent {
   }
 
   async getAccInfo(addr: string) {
-    let info = (await this.client.accountInformation(addr).do());
-    this.chadBalance = info['amount'];
-    console.log(info);
+    // Get acc info
+    let info = (await this.client.lookupAccountByID(addr).do());
+
+    // Get Algo balance
+    this.algoBalance = info['amount'] * 1e-6;
+
+    // Get Chad balance
+    for (var asset of info["assets"]) {
+      if (asset["asset-id"] == 355961778) {
+        this.chadBalance = asset["amount"] * 1e-6;
+      }
+    }
+    console.log(`Detected ${this.algoBalance} Algo`);
+    console.log(`Detected ${this.chadBalance} Chads`);
   }
 }

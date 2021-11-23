@@ -26,8 +26,8 @@
             <li li class="nav-item" *ngSwitchCase="true"  ngbDropdown>
               <a class="nav-link console" href="#" *ngSwitchCase="true" ngbDropdownToggle> {{ printShortAddress(account) }} </a>
               <div ngbDropdownMenu>
-                <button ngbDropdownItem>{{ algoBalance }} Algos</button>
-                <button ngbDropdownItem>2000 Chads</button>
+                <button ngbDropdownItem>{{ algoBalance | number : '1.2-2' }} Algos</button>
+                <button ngbDropdownItem>{{ chadBalance | number : '1.2-2' }}  Chads</button>
                 <div class="dropdown-divider"></div>
                 <button ngbDropdownItem (click)="disconnectWallet()">Disconnect</button>
               </div>
