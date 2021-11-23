@@ -9,15 +9,18 @@ import algosdk, { Account } from 'algosdk';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
-})
+}) 
 
 export class AppComponent {
   title = 'frontend';
-  connector: WalletConnect;
+  connector= new WalletConnect({
+    bridge: "https://bridge.walletconnect.org", // Required
+    qrcodeModal: QRCodeModal,
+  });
   connected = false;
   account: any;
-  algoBalance: number
-  chadBalance: number
+  algoBalance: number = 0;
+  chadBalance: number = 0;
 
   server = "https://testnet-algorand.api.purestake.io/ps2";
   port = "";
@@ -34,12 +37,6 @@ export class AppComponent {
   }))
 
   connectWallet() {
-    // Create a connector
-    this.connector = new WalletConnect({
-      bridge: "https://bridge.walletconnect.org", // Required
-      qrcodeModal: QRCodeModal,
-    });
-
     // Check if connection is already established
     if (!this.connector.connected) {
       // create new session
@@ -85,7 +82,7 @@ export class AppComponent {
 
   async getAccInfo(addr: string) {
     let info = (await this.client.accountInformation(addr).do());
-    this.chadBalance = info.amount
+    this.chadBalance = info['amount'];
     console.log(info);
   }
 }
