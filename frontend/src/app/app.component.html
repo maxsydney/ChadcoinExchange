@@ -10,7 +10,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-              <a class="nav-link console" href="#">Exchange <span class="sr-only">(current)</span></a>
+              <a class="nav-link console" href="#">Exchange</a>
             </li>
             <li class="nav-item">
               <a class="nav-link console" href="#">How it works</a>
@@ -19,9 +19,9 @@
               <a class="nav-link console" href="#">About</a>
             </li>
           </ul>
-          <ul class="navbar-nav" [ngSwitch]="connected" >
+          <ul class="navbar-nav ml-auto" [ngSwitch]="connected" >
             <li class="nav-item" *ngSwitchDefault (click)="connectWallet()">
-              <a class="nav-link console" href="#" >Connect wallet</a>
+              <a class="nav-link console" href="#">Connect wallet</a>
             </li>
             <li li class="nav-item" *ngSwitchCase="true"  ngbDropdown>
               <a class="nav-link console" href="#" *ngSwitchCase="true" ngbDropdownToggle> {{ printShortAddress(account) }} </a>
