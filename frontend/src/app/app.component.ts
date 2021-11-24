@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import WalletConnect from "@walletconnect/client";
 import WalletConnectQRCodeModal from "algorand-walletconnect-qrcode-modal";
-import { interval } from 'rxjs';
-import algosdk, { Account } from 'algosdk';
+import algosdk from 'algosdk';
 // import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 
 @Component({
@@ -27,22 +26,14 @@ export class AppComponent {
 
   client = new algosdk.Indexer(this.token, this.server, this.port);
 
-  // This keeps the page updating. Not a valid solution, learn how to 
-  // repsond to async auth events
-  mySub = interval(100).subscribe((func => {
-    console.log(this.algoBalance);
-
-  }))
-
   connectWallet() {
     this.connector= new WalletConnect({
       bridge: "https://bridge.walletconnect.org", // Required
       qrcodeModal: WalletConnectQRCodeModal,
     });
 
-    // Check if connection is already established{}
+    // Check if connection is already established
     if (!this.connector.connected) {
-      // create new session
       this.connector.createSession();
     }
 
@@ -52,13 +43,12 @@ export class AppComponent {
         throw error;
       }
 
-      console.log("Connecting");
-      // Get provided accounts
+      // Get user account information
       this.account = payload.params[0].accounts[0];
       console.log(this.account);
-      this.connected = true;
-      WalletConnectQRCodeModal.close();
+      this.connected = this.connector.connected;
       this.getAccInfo(this.account);
+      WalletConnectQRCodeModal.close();
     });
 
     this.connector.on("session_update", (error, payload) => {
@@ -67,8 +57,7 @@ export class AppComponent {
       }
 
       console.log("Update")
-      // Get updated accounts 
-      const { accounts } = payload.params[0];
+      // TODO: What do we need to do here
     });
 
     WalletConnectQRCodeModal.open(this.connector.uri, {});
@@ -80,7 +69,7 @@ export class AppComponent {
   }
 
   printShortAddress(addr: string) {
-    return addr.slice(0, 5)+'...';
+    return addr.slice(0, 10) + '...';
   }
 
   async getAccInfo(addr: string) {
