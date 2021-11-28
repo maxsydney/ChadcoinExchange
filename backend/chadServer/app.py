@@ -17,8 +17,9 @@ def handleBuyChadTx():
     """
     Create buy chad transaction
     """
+    print(request)
     schema = models.BuyChadRequestSchema()
-    req = schema.load(request)
+    req = schema.load(json.loads(request.data))
     
     print(req)
 

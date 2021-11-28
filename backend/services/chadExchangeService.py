@@ -8,12 +8,6 @@ from algosdk import logic
 from algosdk.v2client import algod
 from algosdk.future import transaction as algo_txn
 
-def createExchange(client: algod.AlgodClient):
-    """
-    Factory method to create chad exchange service
-    """
-    pass
-
 class ChadExchangeService:
 
     def __init__(self, client: algod.AlgodClient, admin: KeyPair, minChadTxThresh: int, chadID: int):

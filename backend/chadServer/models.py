@@ -39,7 +39,7 @@ class SubmitBuyChadTx:
     """
     Signed atomic group forming a buy chad transaction
     """
-    txs: List(str)
+    txs: List[str]
 
 class SubmitBuyChadTxSchema(Schema):
     txs = fields.List(fields.String())
