@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import WalletConnect from "@walletconnect/client";
 import WalletConnectQRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk from 'algosdk';
+import { HttpClient } from '@angular/common/http';
+
 // import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 
 @Component({
@@ -25,6 +27,10 @@ export class AppComponent {
   };
 
   client = new algosdk.Indexer(this.token, this.server, this.port);
+
+  constructor(private http: HttpClient) {
+    this.http = http;
+  }
 
   connectWallet() {
     this.connector= new WalletConnect({
@@ -88,4 +94,6 @@ export class AppComponent {
     console.log(`Detected ${this.algoBalance} Algo`);
     console.log(`Detected ${this.chadBalance} Chads`);
   }
+
+  // buyChadInitiate()
 }
