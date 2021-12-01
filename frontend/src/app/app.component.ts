@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import WalletConnect from "@walletconnect/client";
-import WalletConnectQRCodeModal from "algorand-walletconnect-qrcode-modal";
+import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk from 'algosdk';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
+import { BuyChadRequest } from './Models/models'
 
 @Component({
   selector: 'app-root',
@@ -37,8 +38,10 @@ export class AppComponent {
   connectWallet() {
     this.connector= new WalletConnect({
       bridge: "https://bridge.walletconnect.org", // Required
-      qrcodeModal: WalletConnectQRCodeModal,
+      qrcodeModal: QRCodeModal,
     });
+
+    QRCodeModal.open(this.connector.uri, () => {});
 
     // Check if connection is already established
     if (!this.connector.connected) {
@@ -56,7 +59,7 @@ export class AppComponent {
       console.log(this.account);
       this.connected = this.connector.connected;
       this.getAccInfo(this.account);
-      WalletConnectQRCodeModal.close();
+      QRCodeModal.close();
     });
 
     this.connector.on("session_update", (error, payload) => {
@@ -68,7 +71,7 @@ export class AppComponent {
       // TODO: What do we need to do here
     });
 
-    WalletConnectQRCodeModal.open(this.connector.uri, {});
+    
   }
 
   disconnectWallet(): void {
@@ -98,8 +101,16 @@ export class AppComponent {
   }
 
   buyChadInitiate() {
+    // User must be connected with valid wallet
+    if (this.connected == false) {
+      console.log("Connect wallet first");
+      return;
+    }
+
     // Request transaction group for the purchase of chadcoin from
     // the chadcoin server
-    
+    let req = new BuyChadRequest(this.account, this.buyChadAlgoAmt.value);
+
+    this.http.post('http://127.0.0.1:5000/', req.serialize()).subscribe(response => console.log(response));
   }
 }
