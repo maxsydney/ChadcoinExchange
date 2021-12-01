@@ -3,8 +3,7 @@ import WalletConnect from "@walletconnect/client";
 import WalletConnectQRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk from 'algosdk';
 import { HttpClient } from '@angular/common/http';
-
-// import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +18,9 @@ export class AppComponent {
   account: any;
   algoBalance: number = 0;
   chadBalance: number = 0;
+
+  buyChadAlgoAmt = new FormControl(0.0);
+  algo2Chad = 10;
 
   server = "https://mainnet-algorand.api.purestake.io/ps2";
   port = "";
@@ -95,5 +97,9 @@ export class AppComponent {
     console.log(`Detected ${this.chadBalance} Chads`);
   }
 
-  // buyChadInitiate()
+  buyChadInitiate() {
+    // Request transaction group for the purchase of chadcoin from
+    // the chadcoin server
+    
+  }
 }

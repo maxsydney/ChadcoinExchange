@@ -19,15 +19,16 @@
               <a class="nav-link console" href="#">About</a>
             </li>
           </ul>
-          <ul class="navbar-nav ml-auto" [ngSwitch]="connected" >
+          <ul class="navbar-nav ml-auto" [ngSwitch]="connected">
             <li class="nav-item" *ngSwitchDefault (click)="connectWallet()">
               <a class="nav-link console" href="#">Connect wallet</a>
             </li>
-            <li li class="nav-item" *ngSwitchCase="true"  ngbDropdown>
-              <a class="nav-link console" href="#" *ngSwitchCase="true" ngbDropdownToggle> {{ printShortAddress(account) }} </a>
+            <li li class="nav-item" *ngSwitchCase="true" ngbDropdown>
+              <a class="nav-link console" href="#" *ngSwitchCase="true" ngbDropdownToggle> {{ printShortAddress(account)
+                }} </a>
               <div ngbDropdownMenu>
                 <button ngbDropdownItem>{{ algoBalance | number : '1.2-2' }} Algos</button>
-                <button ngbDropdownItem>{{ chadBalance | number : '1.2-2' }}  Chads</button>
+                <button ngbDropdownItem>{{ chadBalance | number : '1.2-2' }} Chads</button>
                 <div class="dropdown-divider"></div>
                 <button ngbDropdownItem (click)="disconnectWallet()">Disconnect</button>
               </div>
@@ -45,17 +46,20 @@
                     <div class="input-group-prepend">
                       <span class="input-group-text entry-box text-light console">Spend</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light console" placeholder="0.00" readonly>
+                    <input type="text" class="form-control entry-box text-light console" [formControl]="buyChadAlgoAmt"
+                      placeholder="0.00">
                     <div class="input-group-append">
                       <span class="input-group-text entry-box text-light console">algo</span>
                     </div>
                   </div>
-                  <div class="input-group my-1">
+                  <div class="input-group w-100">
                     <div class="input-group-prepend">
                       <span class="input-group-text entry-box text-light console">Receive</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light console"
-                      aria-label="Amount (to the nearest dollar)" placeholder="0.00">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text entry-box text-light console">{{ buyChadAlgoAmt.value * algo2Chad }}
+                      </span>
+                    </div>
                     <div class="input-group-append">
                       <span class="input-group-text entry-box text-light console">chads</span>
                     </div>
