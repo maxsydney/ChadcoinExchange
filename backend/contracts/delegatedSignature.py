@@ -7,6 +7,10 @@ class DelegatedSignature:
 
     @staticmethod
     def algoSig(exchangeAddr: str, noMoreThan: int):
+        """
+        Returns a TEAL delegated signature approval program for spending up to noMoreThan
+        Algos
+        """
         actions = Cond(
             [DelegatedSignature.isAlgoTx(), DelegatedSignature.validateAlgoTx(exchangeAddr, noMoreThan)],
             [Int(1), Int(0)]    # Fail if none of the criteria are met
@@ -16,6 +20,10 @@ class DelegatedSignature:
 
     @staticmethod
     def chadSig(exchangeAddr: str, noMoreThan: int, chadID: int):
+        """
+        Returns a TEAL delegated signature approval program for spending up to noMoreThan
+        Chads 
+        """
         actions = Cond(
             [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan)],
             [Int(1), Int(0)]    # Fail if none of the criteria are met
@@ -66,7 +74,7 @@ class DelegatedSignature:
         """
         Transaction is validated if
         - Receiver is chadcoin exchange address
-        - Algo amount is no more than limit
+        - Chad amount is no more than limit
         - Generic security criteria is met 
         """
         return And(
