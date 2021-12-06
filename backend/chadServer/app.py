@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from backend.services.chadExchangeService import ChadExchangeService
 import json
 import backend.chadServer.models as models
@@ -23,8 +23,9 @@ def handleBuyChadTx():
     
     print(req)
 
-    response = {"test": 42}
-    return json.dumps(response)
+    response = jsonify({"test": 42})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 if __name__ == "__main__":

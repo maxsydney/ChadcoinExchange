@@ -111,6 +111,6 @@ export class AppComponent {
     // the chadcoin server
     let req = new BuyChadRequest(this.account, this.buyChadAlgoAmt.value);
 
-    this.http.post('http://127.0.0.1:5000/', req.serialize()).subscribe(response => console.log(response));
+    this.http.post('http://127.0.0.1:5000/createBuyChadTx', req.serialize()).subscribe(response => console.log(response));
   }
 }

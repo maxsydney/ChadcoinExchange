@@ -14,7 +14,7 @@ if (prePath := os.getenv('CHAD_EXCHANGE')) == None:
 # Move to the angular frontend project and build
 os.chdir(os.path.join(prePath, "frontend"))
 
-res = subprocess.run(["ng", "build", "--base-href", "/static/"], stdout=sys.stdout)
+res = subprocess.run(["ng", "build", "--base-href", "/static/", "--output-hashing=none"], stdout=sys.stdout)
 if res.returncode != 0:
     raise ValueError("Angular build failed")
 
