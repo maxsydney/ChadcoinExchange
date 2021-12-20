@@ -1,9 +1,9 @@
 import algosdk
 from pyteal import compileTeal, Mode
-from ChadExchangeTest.Services.NetworkInteraction import NetworkInteraction
-from ChadExchangeTest.Services.TransactionService import PaymentTransactionRepository, ASATransactionRepository
-from ChadExchangeTest.Services.KeyPair import KeyPair
-from ChadExchangeTest.Contracts.ChadExchange import ChadExchangeASC1
+from backend.services.networkInteraction import NetworkInteraction
+from backend.services.transactionService import PaymentTransactionRepository, ASATransactionRepository
+from backend.services.keyPair import KeyPair
+from backend.contracts.ChadExchange import ChadExchangeASC1
 from algosdk import logic
 from algosdk.v2client import algod
 from algosdk.future import transaction as algo_txn

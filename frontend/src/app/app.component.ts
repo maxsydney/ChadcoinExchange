@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import { interval } from 'rxjs';
-import algosdk, { Account } from 'algosdk';
-// import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
+import algosdk from 'algosdk';
+import { HttpClient } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { BuyChadRequest } from './Models/models'
 
 @Component({
   selector: 'app-root',
@@ -13,33 +14,37 @@ import algosdk, { Account } from 'algosdk';
 
 export class AppComponent {
   title = 'frontend';
-  connector= new WalletConnect({
-    bridge: "https://bridge.walletconnect.org", // Required
-    qrcodeModal: QRCodeModal,
-  });
+  connector: WalletConnect;
   connected = false;
   account: any;
   algoBalance: number = 0;
   chadBalance: number = 0;
 
-  server = "https://testnet-algorand.api.purestake.io/ps2";
+  buyChadAlgoAmt = new FormControl(0.0);
+  algo2Chad = 10;
+
+  server = "https://mainnet-algorand.api.purestake.io/ps2";
   port = "";
   token = {
     "x-api-key": "Xq0wmBHRay4ou13yYq30e55HYVGWfmBB3qlpBkgT"
   };
 
-  client = new algosdk.Algodv2(this.token, this.server, this.port);
+  client = new algosdk.Indexer(this.token, this.server, this.port);
 
-  // This keeps the page updating. Not a valid solution, learn how to 
-  // repsond to async auth events
-  mySub = interval(100).subscribe((func => {
-    console.log(this.connected);
-  }))
+  constructor(private http: HttpClient) {
+    this.http = http;
+  }
 
   connectWallet() {
+    this.connector= new WalletConnect({
+      bridge: "https://bridge.walletconnect.org", // Required
+      qrcodeModal: QRCodeModal,
+    });
+
+    QRCodeModal.open(this.connector.uri, () => {});
+
     // Check if connection is already established
     if (!this.connector.connected) {
-      // create new session
       this.connector.createSession();
     }
 
@@ -49,13 +54,12 @@ export class AppComponent {
         throw error;
       }
 
-      console.log("Connecting");
-      // Get provided accounts
+      // Get user account information
       this.account = payload.params[0].accounts[0];
       console.log(this.account);
-      this.connected = true;
-      QRCodeModal.close();
+      this.connected = this.connector.connected;
       this.getAccInfo(this.account);
+      QRCodeModal.close();
     });
 
     this.connector.on("session_update", (error, payload) => {
@@ -64,11 +68,10 @@ export class AppComponent {
       }
 
       console.log("Update")
-      // Get updated accounts 
-      const { accounts } = payload.params[0];
+      // TODO: What do we need to do here
     });
 
-    QRCodeModal.open(this.connector.uri, 2);
+    
   }
 
   disconnectWallet(): void {
@@ -77,12 +80,37 @@ export class AppComponent {
   }
 
   printShortAddress(addr: string) {
-    return addr.slice(0, 5)+'...';
+    return addr.slice(0, 10) + '...';
   }
 
   async getAccInfo(addr: string) {
-    let info = (await this.client.accountInformation(addr).do());
-    this.chadBalance = info['amount'];
-    console.log(info);
+    // Get acc info
+    let info = (await this.client.lookupAccountByID(addr).do());
+
+    // Get Algo balance
+    this.algoBalance = info['amount'] * 1e-6;
+
+    // Get Chad balance
+    for (var asset of info["assets"]) {
+      if (asset["asset-id"] == 355961778) {
+        this.chadBalance = asset["amount"] * 1e-6;
+      }
+    }
+    console.log(`Detected ${this.algoBalance} Algo`);
+    console.log(`Detected ${this.chadBalance} Chads`);
+  }
+
+  buyChadInitiate() {
+    // User must be connected with valid wallet
+    if (this.connected == false) {
+      console.log("Connect wallet first");
+      return;
+    }
+
+    // Request transaction group for the purchase of chadcoin from
+    // the chadcoin server
+    let req = new BuyChadRequest(this.account, this.buyChadAlgoAmt.value);
+
+    this.http.post('http://127.0.0.1:5000/createBuyChadTx', req.serialize()).subscribe(response => console.log(response));
   }
 }

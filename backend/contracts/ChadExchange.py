@@ -39,7 +39,7 @@ class ChadExchangeASC1:
         return And(
             Global.group_size() == Int(1),                  # Single Tx
             Txn.type_enum() == TxnType.AssetTransfer,       # Type is asset tx
-            Txn.sender() == Txn.asset_receiver(),             # Sender is receiver
+            Txn.sender() == Txn.asset_receiver(),           # Sender is receiver
         )
 
     def isSwapAlgoForChad(self):
@@ -94,7 +94,7 @@ class ChadExchangeASC1:
         return And(
             Global.group_size() == Int(1),                  # Single Tx
             Txn.type_enum() == TxnType.AssetTransfer,       # Type is asset tx
-            Txn.sender() != Txn.asset_receiver(),             # Sender is not receiver
+            Txn.sender() != Txn.asset_receiver(),           # Sender is not receiver
         )
 
     def handleOptIn(self):
