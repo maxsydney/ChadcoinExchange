@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from backend.services.chadExchangeService import ChadExchangeService
+from backend.services.priceAPI.coingeckoPriceAPI import CoingeckoPriceAPI
 import json
 import backend.chadServer.models as models
 
@@ -21,7 +22,10 @@ def handleBuyChadTx():
     schema = models.BuyChadRequestSchema()
     req = schema.load(json.loads(request.data))
     
-    print(req)
+    api = CoingeckoPriceAPI()
+    price = api.requestAlgoPrice()
+    print(price.success)
+    print(price.price)
 
     response = jsonify({"test": 42})
     response.headers.add('Access-Control-Allow-Origin', '*')
