@@ -1,12 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
-@dataclass
-class PriceReturn:
-    
-    price: float
-    success: bool
-
+from backend.chadServer.models import PriceReturn
 
 class PriceAPIInterface(ABC):
     """

@@ -1,18 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { interval } from 'rxjs';
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import algosdk from 'algosdk';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { BuyChadRequest } from './Models/models'
+import { BuyChadRequest, PriceReturn } from './Models/models'
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
-}) 
+})
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'frontend';
   connector: WalletConnect;
   connected = false;
@@ -21,8 +22,9 @@ export class AppComponent {
   chadBalance: number = 0;
 
   buyChadAlgoAmt = new FormControl(0.0);
-  algo2Chad = 10;
+  algoPerChad = 0;
 
+  // TODO: Move this to server side
   server = "https://mainnet-algorand.api.purestake.io/ps2";
   port = "";
   token = {
@@ -35,16 +37,25 @@ export class AppComponent {
     this.http = http;
   }
 
+  ngOnInit() {
+    // Get the current algo price in NZD every 30 seconds
+    const obs$ = interval(1000);
+    obs$.subscribe((res) => {
+      this.getAlgoPrice();
+    })
+  }
+
   connectWallet() {
-    this.connector= new WalletConnect({
+    this.connector = new WalletConnect({
       bridge: "https://bridge.walletconnect.org", // Required
       qrcodeModal: QRCodeModal,
     });
 
-    QRCodeModal.open(this.connector.uri, () => {});
+    QRCodeModal.open(this.connector.uri, () => { });
 
     // Check if connection is already established
     if (!this.connector.connected) {
+      console.log("Conn already established")
       this.connector.createSession();
     }
 
@@ -70,8 +81,6 @@ export class AppComponent {
       console.log("Update")
       // TODO: What do we need to do here
     });
-
-    
   }
 
   disconnectWallet(): void {
@@ -112,5 +121,16 @@ export class AppComponent {
     let req = new BuyChadRequest(this.account, this.buyChadAlgoAmt.value);
 
     this.http.post('http://127.0.0.1:5000/createBuyChadTx', req.serialize()).subscribe(response => console.log(response));
+  }
+
+  //
+  // Get the current algo price in NZD from the chad server
+  //
+  getAlgoPrice() {
+    console.log("Getting algo price");
+    this.http.get<string>('http://127.0.0.1:5000/getPrice').subscribe(res => {
+      // TODO: Use PriceData interface here to parse directly
+      this.algoPerChad = JSON.parse(res)["price"] / 100;
+    });
   }
 }

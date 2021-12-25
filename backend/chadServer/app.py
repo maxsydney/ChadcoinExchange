@@ -13,6 +13,19 @@ app = Flask(__name__)
 def hello_world():
     return render_template('index.html')
 
+@app.route("/getPrice", methods=["GET"])
+def getPrice():
+    """
+    Returns the current algo price in NZD
+    """
+    api = CoingeckoPriceAPI()
+    priceData = api.requestAlgoPrice()
+    print(priceData.price)
+    schema = models.PriceReturnSchema()
+    res = jsonify(schema.dumps(priceData))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
+
 @app.route("/createBuyChadTx", methods=["POST"])
 def handleBuyChadTx():
     """

@@ -48,3 +48,19 @@ class SubmitBuyChadTxSchema(Schema):
     def createSubmitChadTx(self, data, **kwargs) -> SubmitBuyChadTx:
         return SubmitBuyChadTx(**data)
 
+@dataclass
+class PriceReturn:
+    """
+    Algo price in NZD
+    """
+    
+    price: float
+    success: bool
+
+class PriceReturnSchema(Schema):
+    price = fields.Float()
+    success = fields.Boolean()
+
+    @post_load
+    def createPriceReturn(self, data, **kwargs) -> PriceReturn:
+        return PriceReturn(**data)

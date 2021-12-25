@@ -1,6 +1,6 @@
 import pytest
 import time
-from backend.test.testHelpers import Indexer, Sandbox, Account, Client, Convert, Transaction, indexer
+from backend.test.testHelpers import Indexer, Sandbox, Account, Client, Convert, Transaction, indexer, createExchange
 from backend.services.chadExchangeService import ChadExchangeService
 from backend.services.transactionService import get_default_suggested_params
 from algosdk import constants
@@ -23,164 +23,11 @@ class TestChadExchangeContract:
         cls.admin, cls.user1, cls.user2 = Account.getTestAccounts()
         cls.chadID = Transaction.createChadToken(client=cls.client, owner=cls.admin)
         cls.minChadThresh = Convert.chad2uChad(20)
-        cls.exchange = ChadExchangeService(cls.client, cls.admin, cls.minChadThresh, chadID=cls.chadID)
+        cls.exchange = createExchange(cls.client, cls.admin, cls.minChadThresh, chadID=cls.chadID)
     
     @classmethod
     def teardown_class(cls):
         Sandbox.command("down")
-
-    def test_validOptIn(self):
-        """
-        Check exchange has been correctly opted in to CHAD ASA
-        """
-        self.exchange._optInExchange()
-        accInfo = Indexer.accountInfo(self.exchange.escrowAddress)
-        
-        assert accInfo["account"]["assets"][0]["asset-id"] == self.exchange.chadID
-        assert accInfo["account"]["assets"][0]["amount"] == 0
-
-    def test_optIn_assetSender(self):
-        """
-        Opt-in logic fails when asset_sender is not zero address
-        """
-        # Create a new ASA where the clawback address is non-zero
-        tx = algo_txn.AssetConfigTxn(
-            sender=self.admin.pubKey,
-            sp=get_default_suggested_params(self.client),
-            total=1,
-            default_frozen=False,
-            unit_name="A",
-            asset_name="A",
-            clawback=self.admin.pubKey,
-            strict_empty_address_check=False
-        )
-
-        txSigned = tx.sign(private_key=self.admin.privKey)
-        txid = self.client.send_transaction(txSigned)
-        Transaction.waitForConfirmation(self.client, txid)
-        asaID = self.client.pending_transaction_info(txid)["asset-index"]
-        
-        # Create an opt in transaction
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=0,
-            index=asaID,
-            sp=get_default_suggested_params(self.client)
-        )
-
-        # Sign with the clawback address
-        txSigned = tx.sign(self.admin.privKey)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
-
-
-    def test_optIn_assetCloseTo(self):
-        """
-        Opt-in logic fails when asset_close_to address is not zero address
-        """
-        # Build a custom opt in transaction with a non-zero close-to address
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=0,
-            index=self.exchange.chadID,
-            close_assets_to=self.user1.pubKey,
-            sp=get_default_suggested_params(self.client)
-        )
-
-        txLogSig = algo_txn.LogicSig(self.exchange.escrowBytes)
-        txSigned = algo_txn.LogicSigTransaction(tx, txLogSig)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
-
-    def test_optIn_rekeyAsset(self):
-        """
-        Opt-in logic fails when rekey_address is not zero address
-        """
-        # Build a custom opt in transaction with a non-zero rekey address
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=0,
-            index=self.exchange.chadID,
-            rekey_to=self.user1.pubKey,
-            sp=get_default_suggested_params(self.client)
-        )
-
-        txLogSig = algo_txn.LogicSig(self.exchange.escrowBytes)
-        txSigned = algo_txn.LogicSigTransaction(tx, txLogSig)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
-
-    def test_optIn_wrongAsset(self):
-        """
-        Opt-in logic fails when ASA ID is not ChadCoin
-        """
-        # Build a custom opt in transaction with a wrong chad ID
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=0,
-            index=self.exchange.chadID + 1,
-            sp=get_default_suggested_params(self.client)
-        )
-
-        txLogSig = algo_txn.LogicSig(self.exchange.escrowBytes)
-        txSigned = algo_txn.LogicSigTransaction(tx, txLogSig)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
-
-    def test_optIn_incorrectAmount(self):
-        """
-        Opt-in logic fails when asset amount is not 0
-        """
-        # Build a custom opt in transaction with non-zero amount
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=1,
-            index=self.exchange.chadID,
-            sp=get_default_suggested_params(self.client)
-        )
-
-        txLogSig = algo_txn.LogicSig(self.exchange.escrowBytes)
-        txSigned = algo_txn.LogicSigTransaction(tx, txLogSig)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
-
-    def test_optIn_incorrectFee(self):
-        """
-        Opt-in logic fails when 
-        """
-        # Build a custom opt in transaction with fee above 0.001 algo
-        sp = get_default_suggested_params(self.client)
-        sp.fee = 1001
-
-        tx = algo_txn.AssetTransferTxn(
-            sender=self.exchange.escrowAddress,
-            receiver=self.exchange.escrowAddress,
-            amt=0,
-            index=self.exchange.chadID,
-            sp=sp
-        )
-
-        txLogSig = algo_txn.LogicSig(self.exchange.escrowBytes)
-        txSigned = algo_txn.LogicSigTransaction(tx, txLogSig)
-
-        # Check logic fails
-        with pytest.raises(AlgodHTTPError):
-            self.client.send_transaction(txSigned)
 
     def test_swapAlgoForChad_validSwap(self):
         """

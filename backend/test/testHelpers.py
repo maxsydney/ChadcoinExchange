@@ -2,7 +2,9 @@ import os
 import subprocess
 import pty
 import time
-
+from backend.services.chadExchangeService import ChadExchangeService
+from backend.services.transactionService import PaymentTransactionRepository, ASATransactionRepository
+from backend.services.networkInteraction import NetworkInteraction
 from backend.services.keyPair import KeyPair
 from backend.services.transactionService import get_default_suggested_params
 from algosdk import kmd
@@ -11,10 +13,49 @@ from algosdk.future import transaction as algo_txn
 from algosdk.v2client import indexer
 from algosdk.error import IndexerHTTPError
 
+def createExchange(client: algod.AlgodClient, admin: KeyPair, minChadTxThresh: int, chadID: int) -> ChadExchangeService:
+    """
+    Create a test exchange instance and fund it/opt in to chadcoin
+    """
+    exchange = ChadExchangeService(client, admin, minChadTxThresh, chadID=chadID)
+
+    # Fund exchange
+    fundTxSigned = PaymentTransactionRepository.payment(
+        client=exchange.client, 
+        sender_address=exchange.admin.pubKey, 
+        receiver_address=exchange.escrowAddress, 
+        amount=250000, 
+        sender_private_key=exchange.admin.privKey, 
+        sign_transaction=True
+    )
+    
+    NetworkInteraction.submit_transaction(exchange.client, transaction=fundTxSigned)
+
+    # Opt in contract
+    optInTx = ASATransactionRepository.asa_transfer(
+        client=exchange.client,
+        sender_address=exchange.escrowAddress,
+        receiver_address=exchange.escrowAddress,
+        amount=0,
+        asa_id=exchange.chadID,
+        revocation_target=None,
+        sender_private_key=None,
+        sign_transaction=False
+    )
+
+    optInTxLogSig = algo_txn.LogicSig(exchange.escrowBytes)
+    optInTxSigned = algo_txn.LogicSigTransaction(optInTx, optInTxLogSig)
+
+    NetworkInteraction.submit_transaction(exchange.client, transaction=optInTxSigned)
+
+    return exchange
+
 class Sandbox:
     """
     Test helpers for the sandbox local network
     """
+
+    # TODO: Check $SANDBOX enviroment variable exists
 
     sandboxExecutable = os.path.join(os.environ.get("SANDBOX"), "sandbox")
 
@@ -24,7 +65,6 @@ class Sandbox:
         return subprocess.run(
             [Sandbox.sandboxExecutable, *args], stdin=pty.openpty()[1], capture_output=True
         )
-
 class Account:
     """
     Test helpers for managing accounts

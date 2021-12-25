@@ -10,7 +10,7 @@ class CoingeckoPriceAPI(PriceAPIInterface):
 
     def __init__(self):
         self.currPrice = 0
-        self.lastUpdated = time.time()
+        self.lastUpdated = 0
 
         # Test that we can reach the API endpoint
         if self.requestAlgoPrice().success == False:
