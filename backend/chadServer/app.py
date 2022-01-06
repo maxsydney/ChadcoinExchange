@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from backend.services.chadExchangeService import ChadExchangeService
+from backend.services.priceAPI.coingeckoPriceAPI import CoingeckoPriceAPI
 import json
 import backend.chadServer.models as models
 
@@ -12,6 +13,19 @@ app = Flask(__name__)
 def hello_world():
     return render_template('index.html')
 
+@app.route("/getPrice", methods=["GET"])
+def getPrice():
+    """
+    Returns the current algo price in NZD
+    """
+    api = CoingeckoPriceAPI()
+    priceData = api.requestAlgoPrice()
+    print(priceData.price)
+    schema = models.PriceReturnSchema()
+    res = jsonify(schema.dumps(priceData))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
+
 @app.route("/createBuyChadTx", methods=["POST"])
 def handleBuyChadTx():
     """
@@ -21,7 +35,10 @@ def handleBuyChadTx():
     schema = models.BuyChadRequestSchema()
     req = schema.load(json.loads(request.data))
     
-    print(req)
+    api = CoingeckoPriceAPI()
+    price = api.requestAlgoPrice()
+    print(price.success)
+    print(price.price)
 
     response = jsonify({"test": 42})
     response.headers.add('Access-Control-Allow-Origin', '*')

@@ -16,8 +16,6 @@ class ChadExchangeService:
         self.minChadtxThresh = minChadTxThresh
         self.chadID = chadID
         self.contract = ChadExchangeASC1(adminAddr=self.admin.pubKey, chadID=self.chadID, minChadTxThresh=self.minChadtxThresh)
-        self._fundExchange()
-        self._optInExchange()
 
     @property
     def escrowBytes(self):
@@ -34,56 +32,6 @@ class ChadExchangeService:
     @property
     def escrowAddress(self):
         return logic.address(self.escrowBytes)
-
-    def _fundExchange(self) -> str:
-        """
-        Transfer the minimum algo balance for opting into CHAD from the admin account 
-        to the exchange escrow account
-        """
-        # Fund exchange
-        txSigned = PaymentTransactionRepository.payment(
-            client=self.client, 
-            sender_address=self.admin.pubKey, 
-            receiver_address=self.escrowAddress, 
-            amount=250000, 
-            sender_private_key=self.admin.privKey, 
-            sign_transaction=True
-        )
-        
-        print(f"\nFunding contract {self.escrowAddress}")
-        txID = NetworkInteraction.submit_transaction(
-            self.client, transaction=txSigned
-        )
-
-        return txID
-
-    def _optInExchange(self) -> str:
-        """
-        Transfer some algo from the admin account to the exchange account, then instruct
-        the exchange to opt into chads
-        """
-
-        # Opt exhange into chads
-        optInTx = ASATransactionRepository.asa_transfer(
-            client=self.client,
-            sender_address=self.escrowAddress,
-            receiver_address=self.escrowAddress,
-            amount=0,
-            asa_id=self.chadID,
-            revocation_target=None,
-            sender_private_key=None,
-            sign_transaction=False
-        )
-
-        optInTxLogSig = algo_txn.LogicSig(self.escrowBytes)
-        optInTxSigned = algo_txn.LogicSigTransaction(optInTx, optInTxLogSig)
-
-        print(f"\nOpting contract into CHAD")
-        txID = NetworkInteraction.submit_transaction(
-            self.client, transaction=optInTxSigned
-        )
-
-        return txID
 
     def depositChad(self, amount: int) -> str:
         """
