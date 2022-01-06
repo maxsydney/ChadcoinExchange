@@ -35,10 +35,17 @@ def handleBuyChadTx():
     schema = models.BuyChadRequestSchema()
     req = schema.load(json.loads(request.data))
     
+    # Get the current algo per chad rate
     api = CoingeckoPriceAPI()
     price = api.requestAlgoPrice()
     print(price.success)
     print(price.price)
+ 
+    # Create txs
+
+    # Create atomic group
+
+    # Return atomic group for user to sign
 
     response = jsonify({"test": 42})
     response.headers.add('Access-Control-Allow-Origin', '*')
