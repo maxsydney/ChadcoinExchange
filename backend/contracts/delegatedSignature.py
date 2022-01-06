@@ -2,7 +2,7 @@ from pyteal import *
 
 class DelegatedSignature:
     """
-    Delegated signature transaction for floating exhange payments
+    Delegated signature transaction for floating exchange payments
     """
 
     @staticmethod

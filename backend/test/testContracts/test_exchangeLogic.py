@@ -1,6 +1,6 @@
 import pytest
 import time
-from backend.test.testHelpers import Indexer, Sandbox, Account, Client, Convert, Transaction, indexer
+from backend.test.testHelpers import Indexer, Sandbox, Account, Client, Convert, Transaction
 from backend.services.chadExchangeService import ChadExchangeService
 from backend.services.transactionService import get_default_suggested_params
 from algosdk import constants

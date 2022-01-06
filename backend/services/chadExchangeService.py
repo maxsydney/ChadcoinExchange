@@ -3,7 +3,7 @@ from pyteal import compileTeal, Mode
 from backend.services.networkInteraction import NetworkInteraction
 from backend.services.transactionService import PaymentTransactionRepository, ASATransactionRepository
 from backend.services.keyPair import KeyPair
-from backend.contracts.ChadExchange import ChadExchangeASC1
+from backend.contracts.chadExchange import ChadExchangeASC1
 from algosdk import logic
 from algosdk.v2client import algod
 from algosdk.future import transaction as algo_txn
