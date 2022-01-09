@@ -1,10 +1,11 @@
-import algosdk
+import yaml
+import os
 from pyteal import compileTeal, Mode
 from backend.services.networkInteraction import NetworkInteraction
 from backend.services.transactionService import PaymentTransactionRepository, ASATransactionRepository
 from backend.services.keyPair import KeyPair
 from backend.contracts.chadExchange import ChadExchangeASC1
-from algosdk import logic
+from algosdk import logic, kmd
 from algosdk.v2client import algod
 from algosdk.future import transaction as algo_txn
 
@@ -254,3 +255,47 @@ class ChadExchangeService:
         NetworkInteraction.wait_for_confirmation(self.client, txID)
 
         return txID
+
+def createExchangeService(secrets: str) -> ChadExchangeService:
+    """
+    Create a chad exchange service object from config files
+
+    inputs:
+        secrets: Path to chadserver secrets directory
+    """
+
+    # Create algod daemon
+    algodCfg = yaml.load(os.path.join(secrets, 'algod.yaml'))
+    url = algodCfg['url']
+    token = algodCfg['token']
+    client = algod.AlgodClient(algod_token=token, algod_address=url)
+
+    # Access KMD client
+    kmdCfg = yaml.load(os.path.join(secrets, 'kmd.yaml'))
+    url = kmdCfg['url']
+    token = kmdCfg['token']
+    kcl = kmd.KMDClient(kmd_address=url, kmd_token=token)
+
+    # Get admin keypair
+    wallets = kcl.list_wallets()
+    if 'chadadmin' not in wallets.keys():
+        raise KeyError("chadadmin wallet not managed by local KMD instance. Does it exist?")
+
+    wallet = wallets['chadadmin']
+    handle = kcl.init_wallet_handle(wallet['id'], kmdCfg['walletPassword'])
+
+    pubKeys = kcl.list_keys(handle)
+    if len(pubKeys) != 1:
+        raise ValueError(f"Expected one address in admin wallet (got {len(pubKeys)})")
+
+    admin = KeyPair(pubKeys[0], kcl.export_key(handle, kmdCfg['walletPassword'], pubKeys[0]))
+
+    # Get chadcoin ASA details
+    chadCfg = yaml.load(os.path.join(secrets, 'chadToken.yaml'))
+    asaID = chadCfg['assetID']
+
+    # Get exchange config
+    exchangeCfg = yaml.load(os.path.join(secrets, 'config.yaml'))
+    minChadTxThresh = exchangeCfg['minChadTxThresh']
+
+    return ChadExchangeService(client=client, admin=admin, minChadTxThresh=minChadTxThresh, chadID=asaID)

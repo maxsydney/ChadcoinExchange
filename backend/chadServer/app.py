@@ -3,8 +3,15 @@ from backend.services.chadExchangeService import ChadExchangeService
 from backend.services.priceAPI.coingeckoPriceAPI import CoingeckoPriceAPI
 import json
 import backend.chadServer.models as models
+import os
 
 app = Flask(__name__)
+
+# Check CHAD_EXCHANGE environment variable exists
+if "CHAD_EXCHANGE" not in os.environ:
+    raise KeyError("Please set CHAD_EXCHANGE enviroment variable")
+
+secrets = os.path.join(os.environ['CHAD_EXCHANGE'], 'backend', 'chadServer', '.secret')
 
 # Create the exchange service
 # exchange = ChadExchangeService
