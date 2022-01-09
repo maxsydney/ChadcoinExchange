@@ -1,3 +1,4 @@
 */pycache/*
 *.pyc
 .vscode
+backend/chadServer/.secret/*
