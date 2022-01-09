@@ -71,15 +71,18 @@ class Account:
     """
 
     @staticmethod
-    def getTestAccounts():
-        """
-        Return accounts for unit testing
-        """
-        kcl = kmd.KMDClient(
+    def getKcl() -> kmd.KMDClient:
+        return kmd.KMDClient(
             kmd_address="http://localhost:4002", 
             kmd_token="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         )
 
+    @staticmethod
+    def getTestAccounts():
+        """
+        Return accounts for unit testing
+        """
+        kcl = Account.getKcl()
         wallet = kcl.list_wallets()[0]
         handle = kcl.init_wallet_handle(wallet["id"], "")
         return list(KeyPair(pubKey, kcl.export_key(handle, "", pubKey)) for pubKey in kcl.list_keys(handle))

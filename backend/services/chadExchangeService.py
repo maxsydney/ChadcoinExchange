@@ -265,24 +265,31 @@ def createExchangeService(secrets: str) -> ChadExchangeService:
     """
 
     # Create algod daemon
-    algodCfg = yaml.load(os.path.join(secrets, 'algod.yaml'))
+    with open(os.path.join(secrets, 'algod.yaml')) as algodCfgFile:
+        algodCfg = yaml.safe_load(algodCfgFile)
     url = algodCfg['url']
     token = algodCfg['token']
     client = algod.AlgodClient(algod_token=token, algod_address=url)
 
     # Access KMD client
-    kmdCfg = yaml.load(os.path.join(secrets, 'kmd.yaml'))
+    with open(os.path.join(secrets, 'kmd.yaml')) as kmdCfgFile:
+        kmdCfg = yaml.safe_load(kmdCfgFile)
     url = kmdCfg['url']
     token = kmdCfg['token']
     kcl = kmd.KMDClient(kmd_address=url, kmd_token=token)
 
     # Get admin keypair
     wallets = kcl.list_wallets()
-    if 'chadadmin' not in wallets.keys():
+    chadWallet = None
+    for wallet in wallets:
+        if wallet['name'] == 'chadadmin':
+            chadWallet = wallet
+            break
+
+    if not chadWallet:
         raise KeyError("chadadmin wallet not managed by local KMD instance. Does it exist?")
 
-    wallet = wallets['chadadmin']
-    handle = kcl.init_wallet_handle(wallet['id'], kmdCfg['walletPassword'])
+    handle = kcl.init_wallet_handle(chadWallet['id'], kmdCfg['walletPassword'])
 
     pubKeys = kcl.list_keys(handle)
     if len(pubKeys) != 1:
@@ -291,11 +298,13 @@ def createExchangeService(secrets: str) -> ChadExchangeService:
     admin = KeyPair(pubKeys[0], kcl.export_key(handle, kmdCfg['walletPassword'], pubKeys[0]))
 
     # Get chadcoin ASA details
-    chadCfg = yaml.load(os.path.join(secrets, 'chadToken.yaml'))
+    with open(os.path.join(secrets, 'chadToken.yaml')) as chadCfgFile:
+        chadCfg = yaml.safe_load(chadCfgFile)
     asaID = chadCfg['assetID']
 
     # Get exchange config
-    exchangeCfg = yaml.load(os.path.join(secrets, 'config.yaml'))
+    with open(os.path.join(secrets, 'config.yaml')) as exchangeCfgFile:
+        exchangeCfg = yaml.safe_load(exchangeCfgFile)
     minChadTxThresh = exchangeCfg['minChadTxThresh']
 
     return ChadExchangeService(client=client, admin=admin, minChadTxThresh=minChadTxThresh, chadID=asaID)
