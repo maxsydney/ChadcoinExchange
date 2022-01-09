@@ -2,3 +2,5 @@
 *.pyc
 .vscode
 backend/chadServer/.secret/*
+ChadExchangeArchitecture.md
+
