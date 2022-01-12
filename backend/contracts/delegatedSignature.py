@@ -12,8 +12,7 @@ class DelegatedSignature:
         Algos
         """
         actions = Cond(
-            [DelegatedSignature.isAlgoTx(), DelegatedSignature.validateAlgoTx(exchangeAddr, noMoreThan)],
-            [Int(1), Int(0)]    # Fail if none of the criteria are met
+            [DelegatedSignature.isAlgoTx(), DelegatedSignature.validateAlgoTx(exchangeAddr, noMoreThan)]
         )
 
         return compileTeal(actions, Mode.Signature, version=5)
@@ -25,8 +24,7 @@ class DelegatedSignature:
         Chads 
         """
         actions = Cond(
-            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan)],
-            [Int(1), Int(0)]    # Fail if none of the criteria are met
+            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan)]
         )
 
         return compileTeal(actions, Mode.Signature, version=5)
