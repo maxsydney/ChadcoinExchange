@@ -52,7 +52,7 @@ class ChadExchangeASC1:
 
         return (If(Global.group_size() == Int(3)).Then(
             And(
-                Gtxn[0].type_enum() == TxnType.Payment,             # First tx is payment
+                Gtxn[0].type_enum() == TxnType.Payment,            # First tx is payment
                 Gtxn[1].type_enum() == TxnType.AssetTransfer       # Second tx is asset transfer
             )
         ).Else(
