@@ -6,38 +6,40 @@ class DelegatedSignature:
     """
 
     @staticmethod
-    def algoSig(exchangeAddr: str, noMoreThan: int):
+    def algoSig(exchangeAddr: str, noMoreThan: int, buyAmt: int, chadID: int):
         """
         Returns a TEAL delegated signature approval program for spending up to noMoreThan
-        Algos
+        Algos in exhange for buyAmt Chads
         """
         actions = Cond(
-            [DelegatedSignature.isAlgoTx(), DelegatedSignature.validateAlgoTx(exchangeAddr, noMoreThan)]
+            [DelegatedSignature.isAlgoTx(chadID), DelegatedSignature.validateAlgoTx(exchangeAddr, noMoreThan, buyAmt)]
         )
 
         return compileTeal(actions, Mode.Signature, version=5)
 
     @staticmethod
-    def chadSig(exchangeAddr: str, noMoreThan: int, chadID: int):
+    def chadSig(exchangeAddr: str, noMoreThan: int, buyAmt: int, chadID: int):
         """
         Returns a TEAL delegated signature approval program for spending up to noMoreThan
-        Chads 
+        Chads in exhange for buyAmt Algos
         """
         actions = Cond(
-            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan)]
+            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan, buyAmt)]
         )
 
         return compileTeal(actions, Mode.Signature, version=5)
 
     @staticmethod
-    def isAlgoTx():
+    def isAlgoTx(chadID: int):
         """
         Returns true if the transaction is an algo transfer
         """
 
         return And(
-            Global.group_size() == Int(1),                      # Single Tx
-            Txn.type_enum() == TxnType.Payment,                 # Type is algo tx
+            Global.group_size() == Int(3),                      # Atomic group
+            Gtxn[0].type_enum() == TxnType.Payment,             # First tx is payment
+            Gtxn[1].type_enum() == TxnType.AssetTransfer,       # Second tx is asset transfer
+            Gtxn[1].xfer_asset() == Int(chadID),                # Asset is ChadCoin
         )
 
     @staticmethod
@@ -46,29 +48,39 @@ class DelegatedSignature:
         Returns true if the transaction is a ChadCoin transfer
         """
         return And(
-            Global.group_size() == Int(1),                  # Single Tx
-            Txn.type_enum() == TxnType.AssetTransfer,       # Type is asset tx
-            Txn.xfer_asset() == Int(chadID),                # Asset is ChadCoin
+            Global.group_size() == Int(3),                      # Atomic group
+            Gtxn[0].type_enum() == TxnType.AssetTransfer,       # First tx is asset transfer
+            Gtxn[0].xfer_asset() == Int(chadID),                # Asset is ChadCoin
+            Gtxn[1].type_enum() == TxnType.Payment,             # Second tx is payment
         )
 
     @staticmethod
-    def validateAlgoTx(exchangeAddr: str, noMoreThan: int):
+    def validateAlgoTx(exchangeAddr: str, noMoreThan: int, buyAmt: int):
         """
         Transaction is validated if
-        - Receiver is chadcoin exchange address
-        - Algo amount is no more than limit
+        - Tx0 Receiver is chadcoin exchange address
+        - Tx0 Algo amount is no more than limit
+        - Tx1 asset receiver is Tx0 sender
+        - Tx1 Chad amount is buyAmt
+        - Lease is set
+        - Expiry is set
         - Generic security criteria is met 
         """
         return And(
-            Txn.receiver() == Addr(exchangeAddr),               # Payment is to admin addr
-            Txn.fee() <= Int(1000),                             # Fee is sensible
-            Txn.amount() <= Int(noMoreThan),                    # Amount is less than limit
-            Txn.close_remainder_to() == Global.zero_address(),  # Prevent close remainder to
-            Txn.rekey_to() == Global.zero_address()             # Prevent rekey
+            Gtxn[0].receiver() == Addr(exchangeAddr),               # Payment is to admin addr
+            Gtxn[0].fee() <= Int(1000),                             # Fee is sensible
+            Gtxn[0].amount() <= Int(noMoreThan),                    # Amount is less than limit
+            Gtxn[0].close_remainder_to() == Global.zero_address(),  # Prevent close remainder to
+            Gtxn[0].rekey_to() == Global.zero_address(),            # Prevent rekey
+            Gtxn[0].lease() == Bytes("ChadCoin"),                   # Lease is set
+            Gtxn[1].asset_receiver() == Gtxn[0].sender(),           # Tx1 asset receiver is Tx0 sender
+            Gtxn[1].asset_amount == Int(buyAmt),                    # Tx1 Chad amount is buyAmt
+            Gtxn[1].asset_close_to() == Global.zero_address(),      # Prevent close asset to
+            Gtxn[1].rekey_to() == Global.zero_address(),            # Prevent rekey
         )
 
     @staticmethod
-    def validateChadTx(exchangeAddr: str, noMoreThan: int):
+    def validateChadTx(exchangeAddr: str, noMoreThan: int, buyAmt: int):
         """
         Transaction is validated if
         - Receiver is chadcoin exchange address
