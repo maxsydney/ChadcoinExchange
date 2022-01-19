@@ -1,4 +1,5 @@
 from pyteal import *
+import hashlib
 
 class DelegatedSignature:
     """
@@ -72,9 +73,10 @@ class DelegatedSignature:
             Gtxn[0].amount() <= Int(noMoreThan),                    # Amount is less than limit
             Gtxn[0].close_remainder_to() == Global.zero_address(),  # Prevent close remainder to
             Gtxn[0].rekey_to() == Global.zero_address(),            # Prevent rekey
-            Gtxn[0].lease() == Bytes("ChadCoin"),                   # Lease is set
+            Gtxn[0].lease() == Bytes(hashlib.sha256("ChadCoin".encode()).digest()),                   # Lease is set
             Gtxn[1].asset_receiver() == Gtxn[0].sender(),           # Tx1 asset receiver is Tx0 sender
-            Gtxn[1].asset_amount == Int(buyAmt),                    # Tx1 Chad amount is buyAmt
+            Gtxn[1].asset_amount() == Int(buyAmt),                  # Tx1 Chad amount is buyAmt
+            Gtxn[1].fee() <= Int(1000),                             # Fee is sensible
             Gtxn[1].asset_close_to() == Global.zero_address(),      # Prevent close asset to
             Gtxn[1].rekey_to() == Global.zero_address(),            # Prevent rekey
         )

@@ -50,6 +50,16 @@ def createExchange(client: algod.AlgodClient, admin: KeyPair, minChadTxThresh: i
 
     return exchange
 
+def wait(client: algod.AlgodClient, numRounds: int) -> None:
+    """
+    Wait for numRounds rounds to pass before returning
+    """
+    startRound = client.status()['last-round']
+    currentRound = startRound
+    while (currentRound - startRound) < numRounds:
+        time.sleep(5)
+        currentRound = client.status()['last-round']
+
 class Sandbox:
     """
     Test helpers for the sandbox local network
