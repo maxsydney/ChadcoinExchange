@@ -19,13 +19,13 @@ class DelegatedSignature:
         return compileTeal(actions, Mode.Signature, version=5)
 
     @staticmethod
-    def chadSig(exchangeAddr: str, noMoreThan: int, buyAmt: int, chadID: int):
+    def chadSig(exchangeAddr: str, noLessThan: int, spendAmt: int, chadID: int):
         """
-        Returns a TEAL delegated signature approval program for spending up to noMoreThan
-        Chads in exhange for buyAmt Algos
+        Returns a TEAL delegated signature approval program for spending spendAmt
+        Chads in exhange for more than or equal to noLessThan Algos
         """
         actions = Cond(
-            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noMoreThan, buyAmt)]
+            [DelegatedSignature.isChadTx(chadID), DelegatedSignature.validateChadTx(exchangeAddr, noLessThan, spendAmt)]
         )
 
         return compileTeal(actions, Mode.Signature, version=5)
@@ -80,7 +80,7 @@ class DelegatedSignature:
         )
 
     @staticmethod
-    def validateChadTx(exchangeAddr: str, noLessThan: int, sellAmt: int):
+    def validateChadTx(exchangeAddr: str, noLessThan: int, spendAmt: int):
         """
         Transaction is validated if
         - Receiver is chadcoin exchange address
@@ -90,11 +90,11 @@ class DelegatedSignature:
         return And(
             Gtxn[0].asset_receiver() == Addr(exchangeAddr),         # Chad payment is to admin addr
             Gtxn[0].fee() <= Int(1000),                             # Fee is sensible
-            Gtxn[0].asset_amount() == Int(sellAmt),                 # Amount is sellAmt
+            Gtxn[0].asset_amount() == Int(spendAmt),                # Amount is spendAmt
             Gtxn[0].asset_close_to() == Global.zero_address(),      # Prevent close asset to
             Gtxn[0].rekey_to() == Global.zero_address(),            # Prevent rekey
             Gtxn[0].lease() == Bytes(hashlib.sha256("ChadCoin".encode()).digest()),                   # Lease is set
-            Gtxn[1].receiver() == Gtxn[0].asset_sender(),           # Tx1 receiver is tx0 sender
+            Gtxn[1].receiver() == Gtxn[0].sender(),                 # Tx1 receiver is tx0 sender
             Gtxn[1].amount() >= Int(noLessThan),                    # Tx1 amount is >= noLessThan
             Gtxn[1].fee() <= Int(1000)                              # Tx1 fee is sensible
         )
