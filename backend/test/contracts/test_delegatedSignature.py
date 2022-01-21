@@ -219,7 +219,7 @@ class TestDelegatedSignatureContractBuyChad:
 
     def test_algoSig_paymentToWrongAddress(self):
         """
-        Algo withdrawn from users account may only be transferred to echange account 
+        Algo withdrawn from users account may only be transferred to exchange account 
         """
         # Wait 2 rounds
         wait(self.client, 2)
@@ -955,8 +955,8 @@ class TestDelegatedSignatureContractBuyAlgo:
             validationPaymentTx
         ])
 
-        algoPaymentTx.group = gid
         chadPaymentTx.group = gid
+        algoPaymentTx.group = gid
         validationPaymentTx.group = gid
 
         # Sign transactions
@@ -974,5 +974,197 @@ class TestDelegatedSignatureContractBuyAlgo:
         self.client.send_transactions(signedGroup)
 
         # Replay attack fails
+        with pytest.raises(AlgodHTTPError):
+            self.client.send_transactions(signedGroup)
+
+    def test_chadSig_wrongNumberTransactions(self):
+        """
+        Buy algo with chadcoin - no validation transaction
+        """
+        # Wait 2 rounds
+        wait(self.client, 2)
+
+        # Get delegated signature from user
+        tealContract = DelegatedSignature.chadSig(self.admin.pubKey, 100, 500, self.chadID)
+        program = base64.decodebytes(self.client.compile(tealContract)['result'].encode())
+        delSig = transaction.LogicSig(program)
+        delSig.sign(self.user1.privKey)
+
+        sp = get_default_suggested_params(self.client)
+        sp.last = self.client.status()['last-round'] + 2
+
+        # Create atomic group
+        chadPaymentTx = transaction.AssetTransferTxn(
+            sender=self.user1.pubKey,
+            sp=sp,
+            receiver=self.admin.pubKey,
+            amt=500,
+            index=self.chadID,
+            lease=hashlib.sha256("ChadCoin".encode()).digest()
+        )
+
+        algoPaymentTx = transaction.PaymentTxn(
+            sender=self.admin.pubKey,
+            sp=sp,
+            receiver=self.user1.pubKey,
+            amt=110
+        )
+
+        # Atomic transfer
+        gid = transaction.calculate_group_id([
+            chadPaymentTx,
+            algoPaymentTx
+        ])
+
+        chadPaymentTx.group = gid
+        algoPaymentTx.group = gid
+
+        # Sign transactions
+        chadPaymentTxSigned = transaction.LogicSigTransaction(chadPaymentTx, delSig)
+        algoPaymentTxSigned = algoPaymentTx.sign(self.admin.privKey)
+
+        signedGroup = [
+            chadPaymentTxSigned,
+            algoPaymentTxSigned,
+        ]
+
+        # Check logic fails
+        with pytest.raises(AlgodHTTPError):
+            self.client.send_transactions(signedGroup)
+
+    def test_chadSig_twoChadcoinTransactions(self):
+        """
+        Buy algo with chadcoin - both transactions are chadcoin 
+        """
+        # Wait 2 rounds
+        wait(self.client, 2)
+
+        # Get delegated signature from user
+        tealContract = DelegatedSignature.chadSig(self.admin.pubKey, 100, 500, self.chadID)
+        program = base64.decodebytes(self.client.compile(tealContract)['result'].encode())
+        delSig = transaction.LogicSig(program)
+        delSig.sign(self.user1.privKey)
+
+        sp = get_default_suggested_params(self.client)
+        sp.last = self.client.status()['last-round'] + 2
+
+        # Create atomic group
+        chadPaymentTx = transaction.AssetTransferTxn(
+            sender=self.user1.pubKey,
+            sp=sp,
+            receiver=self.admin.pubKey,
+            amt=500,
+            index=self.chadID,
+            lease=hashlib.sha256("ChadCoin".encode()).digest()
+        )
+
+        chadPaymentTx2 = transaction.AssetTransferTxn(
+            sender=self.admin.pubKey,
+            sp=sp,
+            receiver=self.user1.pubKey,
+            amt=500,
+            index=self.chadID,
+            lease=hashlib.sha256("ChadCoin".encode()).digest()
+        )
+
+        validationPaymentTx = transaction.PaymentTxn(
+            sender=self.user1.pubKey,
+            sp=sp,
+            receiver=self.admin.pubKey,
+            amt=0
+        )
+
+        # Atomic transfer
+        gid = transaction.calculate_group_id([
+            chadPaymentTx,
+            chadPaymentTx2,
+            validationPaymentTx
+        ])
+
+        chadPaymentTx.group = gid
+        chadPaymentTx2.group = gid
+        validationPaymentTx.group = gid
+
+        # Sign transactions
+        chadPaymentTxSigned = transaction.LogicSigTransaction(chadPaymentTx, delSig)
+        chadPaymentTx2Signed = chadPaymentTx2.sign(self.admin.privKey)
+        validationPaymentTxSigned = validationPaymentTx.sign(self.user1.privKey)
+
+        signedGroup = [
+            chadPaymentTxSigned,
+            chadPaymentTx2Signed,
+            validationPaymentTxSigned
+        ]
+
+        # Check logic fails
+        with pytest.raises(AlgodHTTPError):
+            self.client.send_transactions(signedGroup)
+
+    def test_chadSig_paymentToWrongAddress(self):
+        """
+        Chads withdrawn from users account may only be transferred to exchange account  
+        """
+        # Wait 2 rounds
+        wait(self.client, 2)
+
+        # Get delegated signature from user
+        tealContract = DelegatedSignature.chadSig(self.admin.pubKey, 100, 500, self.chadID)
+        program = base64.decodebytes(self.client.compile(tealContract)['result'].encode())
+        delSig = transaction.LogicSig(program)
+        delSig.sign(self.user1.privKey)
+
+        sp = get_default_suggested_params(self.client)
+        sp.last = self.client.status()['last-round'] + 2
+
+        # Opt user 2 into chadcoin
+        Transaction.sendAsset(self.client, self.user2.pubKey, self.user2.pubKey, self.user2.privKey, 0, self.chadID)
+
+        # Create atomic group
+        chadPaymentTx = transaction.AssetTransferTxn(
+            sender=self.user1.pubKey,
+            sp=sp,
+            receiver=self.user2.pubKey,
+            amt=500,
+            index=self.chadID,
+            lease=hashlib.sha256("ChadCoin".encode()).digest()
+        )
+
+        algoPaymentTx = transaction.PaymentTxn(
+            sender=self.admin.pubKey,
+            sp=sp,
+            receiver=self.user1.pubKey,
+            amt=110
+        )
+
+        validationPaymentTx = transaction.PaymentTxn(
+            sender=self.user1.pubKey,
+            sp=sp,
+            receiver=self.admin.pubKey,
+            amt=0
+        )
+
+        # Atomic transfer
+        gid = transaction.calculate_group_id([
+            chadPaymentTx,
+            algoPaymentTx,
+            validationPaymentTx
+        ])
+
+        chadPaymentTx.group = gid
+        algoPaymentTx.group = gid
+        validationPaymentTx.group = gid
+
+        # Sign transactions
+        chadPaymentTxSigned = transaction.LogicSigTransaction(chadPaymentTx, delSig)
+        algoPaymentTxSigned = algoPaymentTx.sign(self.admin.privKey)
+        validationPaymentTxSigned = validationPaymentTx.sign(self.user1.privKey)
+
+        signedGroup = [
+            chadPaymentTxSigned,
+            algoPaymentTxSigned,
+            validationPaymentTxSigned
+        ]
+
+        # Check logic fails
         with pytest.raises(AlgodHTTPError):
             self.client.send_transactions(signedGroup)
