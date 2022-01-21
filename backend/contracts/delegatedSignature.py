@@ -80,7 +80,7 @@ class DelegatedSignature:
         )
 
     @staticmethod
-    def validateChadTx(exchangeAddr: str, noMoreThan: int, buyAmt: int):
+    def validateChadTx(exchangeAddr: str, noLessThan: int, sellAmt: int):
         """
         Transaction is validated if
         - Receiver is chadcoin exchange address
@@ -88,9 +88,13 @@ class DelegatedSignature:
         - Generic security criteria is met 
         """
         return And(
-            Txn.asset_receiver() == Addr(exchangeAddr),         # Payment is to admin addr
-            Txn.fee() <= Int(1000),                             # Fee is sensible
-            Txn.asset_amount() <= Int(noMoreThan),              # Amount is less than limit
-            Txn.asset_close_to() == Global.zero_address(),      # Prevent close asset to
-            Txn.rekey_to() == Global.zero_address()             # Prevent rekey
+            Gtxn[0].asset_receiver() == Addr(exchangeAddr),         # Chad payment is to admin addr
+            Gtxn[0].fee() <= Int(1000),                             # Fee is sensible
+            Gtxn[0].asset_amount() == Int(sellAmt),                 # Amount is sellAmt
+            Gtxn[0].asset_close_to() == Global.zero_address(),      # Prevent close asset to
+            Gtxn[0].rekey_to() == Global.zero_address(),            # Prevent rekey
+            Gtxn[0].lease() == Bytes(hashlib.sha256("ChadCoin".encode()).digest()),                   # Lease is set
+            Gtxn[1].receiver() == Gtxn[0].asset_sender(),           # Tx1 receiver is tx0 sender
+            Gtxn[1].amount() >= Int(noLessThan),                    # Tx1 amount is >= noLessThan
+            Gtxn[1].fee() <= Int(1000)                              # Tx1 fee is sensible
         )
