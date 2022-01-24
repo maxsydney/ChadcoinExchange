@@ -2,11 +2,11 @@ import { Serializable, Deserializable } from "../serialization"
 
 export class BuyChadRequest implements Deserializable, Serializable {
     addr: string;
-    algoAmount: Number;
+    chadAmount: Number;
 
-    constructor(addr: string, algoAmount: Number) {
+    constructor(addr: string, chadAmount: Number) {
         this.addr = addr;
-        this.algoAmount = algoAmount;
+        this.chadAmount = chadAmount;
     }
 
     deserialize(input: any): this {

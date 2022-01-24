@@ -44,24 +44,24 @@
                 <div class="col-md-6">
                   <div class="input-group my-1">
                     <div class="input-group-prepend">
-                      <span class="input-group-text entry-box text-light console">Spend</span>
+                      <span class="input-group-text entry-box text-light console">Buy</span>
                     </div>
-                    <input type="text" class="form-control entry-box text-light console" [formControl]="buyChadAlgoAmt"
+                    <input type="text" class="form-control entry-box text-light console" [formControl]="buyChadAmt"
                       placeholder="0.00">
                     <div class="input-group-append">
-                      <span class="input-group-text entry-box text-light console">algo</span>
+                      <span class="input-group-text entry-box text-light console">chads</span>
                     </div>
                   </div>
                   <div class="input-group w-100">
                     <div class="input-group-prepend">
-                      <span class="input-group-text entry-box text-light console">Receive</span>
+                      <span class="input-group-text entry-box text-light console">Spend <= </span>
                     </div>
                     <div class="input-group-prepend">
-                      <span class="input-group-text entry-box text-light console">{{ buyChadAlgoAmt.value / algoPerChad }}
+                      <span class="input-group-text entry-box text-light console">{{ buyChadAmt.value * algoPerChad }}
                       </span>
                     </div>
                     <div class="input-group-append">
-                      <span class="input-group-text entry-box text-light console">chads</span>
+                      <span class="input-group-text entry-box text-light console">algo</span>
                     </div>
                   </div>
                   <div class="row mx-auto my-1">

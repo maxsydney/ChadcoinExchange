@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   algoBalance: number = 0;
   chadBalance: number = 0;
 
-  buyChadAlgoAmt = new FormControl(0.0);
+  buyChadAmt = new FormControl(0.0);
   algoPerChad = 0;
 
   // TODO: Move this to server side
@@ -118,7 +118,7 @@ export class AppComponent implements OnInit {
 
     // Request transaction group for the purchase of chadcoin from
     // the chadcoin server
-    let req = new BuyChadRequest(this.account, this.buyChadAlgoAmt.value);
+    let req = new BuyChadRequest(this.account, this.buyChadAmt.value);
 
     this.http.post('http://127.0.0.1:5000/createBuyChadTx', req.serialize()).subscribe(response => console.log(response));
   }
