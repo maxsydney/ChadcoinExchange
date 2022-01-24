@@ -8,11 +8,11 @@ class BuyChadRequest:
     Request to construct a buy chad transaction
     """
     addr: str
-    algoAmount: int
+    chadAmount: int
 
 class BuyChadRequestSchema(Schema):
     addr = fields.String()
-    algoAmount = fields.Integer()
+    chadAmount = fields.Integer()
 
     @post_load
     def createBuyChadRequest(self, data, **kwargs) -> BuyChadRequest:
@@ -21,11 +21,10 @@ class BuyChadRequestSchema(Schema):
 @dataclass
 class BuyChadResponse:
     """
-    Response to a BuyChadRequest. Returns a list of transactions that form an
-    atomic group. The first two transactions are signed by the chad server. The
-    third transaction is to be signed by the user
+    Response to a BuyChadRequest. Returns an encoded logicSig object representing the delegated
+    signature contract for the user to sign
     """
-    txs: List[str]
+    txs: str
 
 class BuyChadResponseSchema(Schema):
     txs = fields.List(fields.String())
