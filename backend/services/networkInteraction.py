@@ -1,8 +1,11 @@
 import base64
 from typing import Optional
+import yaml
+import os
 
 from algosdk.future.transaction import SignedTransaction
 from algosdk.v2client import algod
+from algosdk import kmd
 
 class NetworkInteraction:
 
@@ -74,3 +77,40 @@ class NetworkInteraction:
         """
         compile_response = client.compile(source_code)
         return base64.b64decode(compile_response['result'])
+
+    @staticmethod
+    def createAlgodClient(rootPath: str) -> algod.AlgodClient:
+        """
+        Create an algod client
+        """
+
+        with open(os.path.join(rootPath, "algod.yaml"), 'r') as stream:
+            try:
+                parsed_yaml=yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+
+        client = algod.AlgodClient(
+            algod_token=parsed_yaml['token'], 
+            algod_address=parsed_yaml['url']
+        )
+
+        return client
+
+    @staticmethod
+    def createKMDClient(rootPath: str) -> kmd.KMDClient:
+        """
+        Create a KMD client
+        """
+
+        with open(os.path.join(rootPath, "kmd.yaml"), 'r') as stream:
+            try:
+                kmdConfig=yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        return kmd.KMDClient(
+            kmd_address=kmdConfig['url'], 
+            kmd_token=kmdConfig['token']
+        )

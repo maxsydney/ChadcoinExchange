@@ -9,10 +9,12 @@ class BuyChadRequest:
     """
     addr: str
     chadAmount: int
+    algoNoMoreThan: int
 
 class BuyChadRequestSchema(Schema):
     addr = fields.String()
     chadAmount = fields.Integer()
+    algoNoMoreThan = fields.Integer()
 
     @post_load
     def createBuyChadRequest(self, data, **kwargs) -> BuyChadRequest:
